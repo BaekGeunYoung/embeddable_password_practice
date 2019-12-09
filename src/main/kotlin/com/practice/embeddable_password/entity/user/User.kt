@@ -1,10 +1,8 @@
 package com.practice.embeddable_password.entity.user
 
-import javax.persistence.Column
-import javax.persistence.Embedded
-import javax.persistence.GeneratedValue
-import javax.persistence.Id
+import javax.persistence.*
 
+@Entity
 data class User(
     @Id @GeneratedValue
     var id: Long? = null,

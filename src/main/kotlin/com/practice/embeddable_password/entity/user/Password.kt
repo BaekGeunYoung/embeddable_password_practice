@@ -4,42 +4,38 @@ import com.practice.embeddable_password.exception.PasswordFailedExceededExceptio
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import java.time.LocalDateTime
-import java.util.*
 import javax.persistence.Embeddable
 
 @Embeddable
 data class Password(
         var value: String,
-        var expirationDate: LocalDateTime,
-        var failedCount: Int,
-        var ttl: Long = 1209604,
-        @Autowired private val bCryptPasswordEncoder: BCryptPasswordEncoder
+        @Autowired private val bCryptPasswordEncoder: BCryptPasswordEncoder? = null
 ) {
-    constructor() : this() {
-
-    }
+    private var expirationDate = LocalDateTime.now().plusDays(14)
+    private var failedCount = 0
 
     fun isMatched(rawPassword: String?): Boolean {
-        if (failedCount >= 5) throw PasswordFailedExceededException()
         val matches: Boolean = isMatches(rawPassword)
         updateFailedCount(matches)
+        if (failedCount >= 5) throw PasswordFailedExceededException()
+
         return matches
     }
 
-    private fun isMatches(rawPassword: String?): Boolean = this.value == bCryptPasswordEncoder.encode(rawPassword)
+    private fun isMatches(rawPassword: String?): Boolean = this.value == bCryptPasswordEncoder!!.encode(rawPassword)
 
     private fun updateFailedCount(matches: Boolean) {
-        this.failedCount = 0
+        this.failedCount = if(matches) 0 else this.failedCount + 1
     }
 
     fun changePassword(newPassword: String?, oldPassword: String?) {
         if (isMatched(oldPassword)) {
-            value = bCryptPasswordEncoder.encode(newPassword)
+            value = bCryptPasswordEncoder!!.encode(newPassword)
             extendExpirationDate()
         }
     }
 
     private fun extendExpirationDate() {
-        this.expirationDate = Date() + ttl
+        this.expirationDate = LocalDateTime.now().plusDays(14)
     }
 }
