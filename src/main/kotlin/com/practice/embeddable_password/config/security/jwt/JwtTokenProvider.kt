@@ -1,21 +1,19 @@
 package com.practice.embeddable_password.config.security.jwt
 
+import com.practice.embeddable_password.config.security.userdetails.CustomUserDetailsService
 import io.jsonwebtoken.*
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.userdetails.UserDetails
-import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.stereotype.Component
 import java.util.*
 import javax.servlet.http.HttpServletRequest
 
 @Component
 class JwtTokenProvider(
-        @Qualifier("customUserDetailsService")
         @Autowired
-        private val userDetailsService: UserDetailsService
+        private val userDetailsService: CustomUserDetailsService
 ) {
     private val secretKey: String = "jwt_secret_geunyoung"
     private val validityInMilliseconds: Long = 36000000

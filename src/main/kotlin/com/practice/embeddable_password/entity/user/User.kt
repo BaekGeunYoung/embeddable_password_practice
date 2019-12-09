@@ -10,6 +10,8 @@ data class User(
     @Column(name="username", unique = true, length = 200)
     var username: String,
 
+    @Enumerated(EnumType.STRING)
+    @ElementCollection(fetch = FetchType.EAGER)
     var roles: MutableSet<Role>,
 
     @Embedded
