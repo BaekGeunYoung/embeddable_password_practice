@@ -1,4 +1,4 @@
-package com.project.recofashion.recofashion_app.config.security.jwt
+package com.practice.embeddable_password.config.security.jwt
 
 import io.jsonwebtoken.*
 import org.springframework.beans.factory.annotation.Autowired

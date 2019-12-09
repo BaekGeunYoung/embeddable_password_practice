@@ -1,4 +1,4 @@
-package com.project.recofashion.recofashion_app.config.security.jwt
+package com.practice.embeddable_password.config.security.jwt
 
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.config.annotation.SecurityConfigurerAdapter
