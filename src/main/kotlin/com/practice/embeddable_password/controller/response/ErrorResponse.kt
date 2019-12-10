@@ -1,14 +1,28 @@
 package com.practice.embeddable_password.controller.response
 
-class ErrorResponse(
-        private val message: String,
-        private val code: String,
-        private val status: Int,
-        private val errors: List<FieldError> = listOf()
+import com.practice.embeddable_password.exception.ErrorCode
+
+data class ErrorResponse(
+        val message: String,
+        val code: String,
+        val status: Int,
+        var details: List<ErrorDetail> = listOf()
 ) {
-    class FieldError(
-            private val field: String,
-            private val value: String,
-            private val reason: String
+    class ErrorDetail(
+            val message: String
     )
+
+    companion object {
+        fun of(errorCode: ErrorCode, details: List<ErrorDetail>? = null): ErrorResponse {
+            val errorResponse = ErrorResponse(
+                    message = errorCode.message,
+                    code = errorCode.code,
+                    status = errorCode.status
+            )
+
+            details?.let{ errorResponse.details = it }
+
+            return errorResponse
+        }
+    }
 }
