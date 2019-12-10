@@ -1,7 +1,6 @@
 package com.practice.embeddable_password.entity.user
 
 import com.practice.embeddable_password.exception.PasswordFailedExceededException
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import java.time.LocalDateTime
 import javax.persistence.Embeddable
