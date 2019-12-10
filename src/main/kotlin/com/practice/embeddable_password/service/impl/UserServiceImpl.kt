@@ -3,12 +3,14 @@ package com.practice.embeddable_password.service.impl
 import com.practice.embeddable_password.config.security.jwt.JwtTokenProvider
 import com.practice.embeddable_password.dto.AccountDto
 import com.practice.embeddable_password.entity.user.User
+import com.practice.embeddable_password.exception.PasswordNotMatchedException
 import com.practice.embeddable_password.repository.UserRepository
 import com.practice.embeddable_password.service.UserService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.security.core.Authentication
 import org.springframework.security.core.AuthenticationException
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
@@ -30,20 +32,32 @@ class UserServiceImpl(
 
         try{
             val authenticator = UsernamePasswordAuthenticationToken(signInDto.username, signInDto.rawPassword)
-            authenticationManager.authenticate(authenticator)
+            authenticationManager.authenticate(authenticator as Authentication?)
 
-            user.password.updateFailedCount(true)
-            val token: String = jwtTokenProvider.createToken(signInDto.username, user.roles.map { it.name }.toList())
-
-            val ret: MutableMap<String, Any> = HashMap()
-            ret["username"] = signInDto.username
-            ret["token"] = token
-
-            return ret
+            return authenticationSuccess(user, jwtTokenProvider)
         }
         catch (e: AuthenticationException) {
-            user.password.updateFailedCount(false)
-            throw BadCredentialsException("invalid username/password supplied")
+            val failCount = authenticationFail(user)
+            throw PasswordNotMatchedException(failCount)
         }
+    }
+
+    private fun authenticationSuccess(user: User, jwtTokenProvider: JwtTokenProvider): MutableMap<String, Any> {
+        user.password.updateFailedCount(true)
+        val token: String = jwtTokenProvider.createToken(user.username, user.roles.map { it.name }.toList())
+
+        val ret: MutableMap<String, Any> = HashMap()
+        ret["username"] = user.username
+        ret["token"] = token
+
+        userRepository.save(user)
+        return ret
+    }
+
+    private fun authenticationFail(user: User): Int {
+        user.password.updateFailedCount(false)
+        userRepository.save(user)
+
+        return user.password.getFailedCount()
     }
 }
