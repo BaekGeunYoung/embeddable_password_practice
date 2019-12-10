@@ -14,7 +14,10 @@ data class Password(
     private var failedCount = 0
 
     fun updateFailedCount(matches: Boolean) {
-        this.failedCount = if(matches) 0 else this.failedCount + 1
+        failedCount = if(matches) 0 else failedCount + 1
+
+        if(matches) extendExpirationDate()
+        if(failedCount >= 5) throw PasswordFailedExceededException()
     }
 
     fun changePassword(newPassword: String, oldPassword: String, bCryptPasswordEncoder: BCryptPasswordEncoder) {
@@ -25,4 +28,8 @@ data class Password(
     private fun extendExpirationDate() {
         this.expirationDate = LocalDateTime.now().plusDays(14)
     }
+
+    fun getFailedCount() = failedCount
+
+    fun getExpirationDate() = expirationDate
 }
